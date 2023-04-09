@@ -1,0 +1,27 @@
+<%- include('head')%>
+<body>
+
+
+<form action="/group" method="POST" id="addGroup">
+    <h2>add group</h2>
+
+    <div class="form-group row">
+
+    <label for="group" class="form-label">Group </label>
+    <select id="group" name="group" class="form-control">
+
+   
+        <% for (let i = 1; i <= groups; i++) { %>
+            <option value="group<%= i %>">Group<%= i %></option>
+          <% } %>   
+        
+            
+        </select>
+    </div>
+
+
+    <button class="btn">Save Group</button>
+    
+</form>
+</body>
+</html>

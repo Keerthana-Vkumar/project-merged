@@ -1,0 +1,22 @@
+<%- include('head')%>
+<body>
+<form action="/register" id="loginForm" method="POST" class="login-form" enctype="application/x-www-form-urlencoded">
+    <h2>Sign Up</h2>
+    <label for="username">Username</label>
+    <input type="text" name="username" id="username" required/>
+    <label for="name">Name</label>
+    <input id="name" type="text" placeholder="name" name="name">
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required/>
+    <div>
+        <label for="student">Student</label>
+        <input type="radio" name="userType" id="student" value="student"/>
+    </div>
+    <div>
+        <label for="professor">Professor</label>
+        <input type="radio" name="userType" id="professor" value="professor"/>
+    </div>
+    <input type="submit" value="Sign Up"/>
+</form>
+</body>
+</html>

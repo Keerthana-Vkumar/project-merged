@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whiteboard</title>
+    <link rel="stylesheet" href="/css/whiteboard.css"/>
+</head>
+<body>
+<canvas id="canvas" class="whiteboard" style="width: 80%; height: 88%;"></canvas>
+<div id="user-list">
+    <ul></ul>
+</div>
+<div id="timer-controls">
+    <input id="timer-input" type="number" min="1" placeholder="Enter time in seconds">
+    <button class="startBtn" onclick="startTimer(document.getElementById('timer-input').value)">Start Timer</button>
+    <input id="color-input" type="color" value="#000000">
+    <button class="changeBtn" onclick="changeColor(document.getElementById('color-input').value)">Change Color</button>
+    <button class="eraseBtn" id="eraser-btn">Eraser</button>
+    <div id="eraser-slider-container" style="display: none;">
+        <input id="eraser-slider" type="range" min="1" max="50" value="10">
+        <span id="eraser-size">10</span>
+    </div>
+    <button class="brushBtn" id="brush-btn">Brush</button>
+    <div id="brush-slider-container" style="display: none;">
+        <input id="brush-slider" type="range" min="1" max="50" value="2">
+        <span id="brush-size">2</span>
+    </div>
+    <button class="gradeBtn" id="grade-btn">Grading</button>
+    <button class="backBtn" id="back-btn">back</button>
+</div>
+<div class="form-container">
+    <form
+            class="grade-form"
+            id="gradeForm"
+    >
+        <h2>Grading</h2>
+        <label for="username">Student Name:</label>
+        <input type="text" name="username" id="username" required/>
+        <label for="grade">Password:</label>
+        <input type="number" name="grade" id="grade" required/>
+        <input type="submit" value = "Submit" />
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+<script>
+    let canvas = document.getElementById('canvas')
+    let currentColor = "#000000";
+    // prevent cursor shift
+    let lastX, lastY;
+    let x;
+    let y;
+    let drawingStarted;
+    let socket = io.connect('http://localhost:3000/')
+    let lastPathId;
+    let ctx = canvas.getContext("2d");
+    let mouseDown = false;
+    let erasing = false;
+    let currentPath = null;
+    let lineWidth = 2;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    const canvasOffset = canvas.getBoundingClientRect();
+    const queryParams = getQueryParams();
+    const userListElement = document.getElementById("user-list");
+    const eraserBtn = document.getElementById("eraser-btn");
+    const eraserSlider = document.getElementById("eraser-slider");
+    const eraserSizeDisplay = document.getElementById("eraser-size");
+    const eraserSliderContainer = document.getElementById("eraser-slider-container");
+    const brushBtn = document.getElementById("brush-btn");
+    const brushSlider = document.getElementById("brush-slider");
+    const brushSizeDisplay = document.getElementById("brush-size");
+    const brushSliderContainer = document.getElementById("brush-slider-container");
+    const backBtn = document.getElementById("back-btn");
+    const gradeForm = document.getElementById("gradeForm");
+    const gradeBtn = document.getElementById("grade-btn");
+    let joinedName = '<%= username %>';
+    console.log("hahahah")
+    console.log(joinedName)
+    const formContainer = document.querySelector(".form-container");
+    formContainer.style.display = "none";
+
+
+    brushBtn.addEventListener("click", () => {
+        erasing = false;
+        eraserBtn.style.backgroundColor = "";
+        eraserSliderContainer.style.display = "none";
+        brushSliderContainer.style.display = "block";
+    });
+    brushSlider.addEventListener("input", (e) => {
+        lineWidth = e.target.value;
+        brushSizeDisplay.textContent = lineWidth;
+    });
+
+    eraserBtn.addEventListener("click", () => {
+        erasing = !erasing;
+        eraserBtn.style.backgroundColor = erasing ? "#ccc" : "";
+        eraserSliderContainer.style.display = erasing ? "block" : "none";
+    });
+    eraserSlider.addEventListener("input", (e) => {
+        eraserSizeDisplay.textContent = e.target.value;
+    });
+
+    canvas.onmousemove = (e) => {
+        x = e.clientX;
+        y = e.clientY;
+        const adjustedCoords = adjustMouseCoordinates(e);
+        if (mouseDown) {
+            if (erasing) {
+                const size = eraserSlider.value;
+                ctx.clearRect(adjustedCoords.x - size / 2, adjustedCoords.y - size / 2, size, size);
+                socket.emit("erase", {...adjustedCoords, size});
+            } else {
+                socket.emit("draw", {...adjustedCoords, color: currentColor, lineWidth});
+                ctx.beginPath();
+                ctx.strokeStyle = currentColor;
+                ctx.lineWidth = lineWidth;
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(adjustedCoords.x, adjustedCoords.y);
+                ctx.stroke();
+                ctx.closePath();
+                lastX = adjustedCoords.x;
+                lastY = adjustedCoords.y;
+            }
+        }
+    };
+
+    canvas.onmousedown = (e) => {
+        const adjustedCoords = adjustMouseCoordinates(e);
+
+        lastX = adjustedCoords.x;
+        lastY = adjustedCoords.y;
+        ctx.moveTo(adjustedCoords.x, adjustedCoords.y);
+        socket.emit('down', {...adjustedCoords, color: currentColor, lineWidth});
+        mouseDown = true;
+    };
+
+    canvas.onmouseup = (e) => {
+        mouseDown = false;
+    }
+
+    socket.on("connect", () => {
+        // const queryParams = getQueryParams();
+        // const {username, password, userType} = queryParams;
+        socket.emit("user_joined", {'username': joinedName});
+        socket.emit("requestDrawingData");
+    });
+
+    const {username, password, userType} = queryParams;
+
+    backBtn.addEventListener("click", () => {
+        socket.emit("user_left");
+        window.location.href = `/?username=${username}`;
+    });
+
+    gradeBtn.addEventListener("click", () => {
+        formContainer.style.display = formContainer.style.display === "none" ? "block" : "none";
+    });
+
+    socket.on('ondraw', ({x, y, color, lineWidth}) => {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.closePath();
+        lastX = x;
+        lastY = y;
+    });
+
+
+    socket.on("onerase", ({x, y, size}) => {
+        ctx.clearRect(x - size / 2, y - size / 2, size, size);
+    });
+
+    socket.on("segmentStart", () => {
+        ctx.closePath();
+        ctx.beginPath();
+    });
+
+    socket.on('ondown', ({x, y, color, lineWidth}) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.moveTo(x, y);
+        lastX = x;
+        lastY = y;
+    });
+
+    socket.on("initialize", (drawingData) => {
+        ctx.beginPath();
+        drawingData.forEach((data) => {
+            if (data.type === "draw") {
+                ctx.strokeStyle = data.color;
+                ctx.lineWidth = data.lineWidth || 2;
+                ctx.lineTo(data.x, data.y);
+                ctx.stroke();
+            } else if (data.type === "down") {
+                ctx.beginPath();
+                ctx.moveTo(data.x, data.y);
+            } else if (data.type === "segmentStart") {
+                ctx.closePath();
+                ctx.beginPath();
+            }
+        });
+    });
+
+    socket.on("userList", (userList) => {
+        const userListElement = document.querySelector("#user-list ul");
+        userListElement.innerHTML = userList
+            .map((user) => `<li class="${user.remainingTime <= 0 ? 'time-up' : ''}" style="border:1px groove black;">${user.username} - ${user.remainingTime}s</li>`)
+            .join("");
+    });
+
+    function startTimer(time) {
+        socket.emit("start_timer", time);
+        const timerId = setInterval(() => {
+            time -= 1;
+            if (time <= 0) {
+                clearInterval(timerId);
+                time = 0;
+            }
+            socket.emit("start_timer", time);
+        }, 1000);
+    }
+
+    function changeColor(newColor) {
+        currentColor = newColor;
+    }
+
+    function adjustMouseCoordinates(e) {
+        return {
+            x: e.clientX - canvasOffset.left,
+            y: e.clientY - canvasOffset.top,
+        };
+    }
+
+    function getQueryParams() {
+        const queryString = window.location.search.substring(1);
+        const params = queryString.split("&");
+        const result = {};
+
+        for (const param of params) {
+            const [key, value] = param.split("=");
+            result[key] = decodeURIComponent(value);
+        }
+
+        return result;
+    }
+
+</script>
+</body>
+</html>

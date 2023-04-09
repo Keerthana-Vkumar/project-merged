@@ -1,0 +1,71 @@
+<%- include('head')%>
+<body>
+
+    <div id="finishedQuiz">
+        <h3>You socred <%= score %> out of <%= quizLength %> and finished the quiz in <%= myMinutes%> minutes and <%= mySeconds%> seconds</h3>   
+    <button class="btn" id="round2">ROUND 2</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script>
+        var socket = io('http://localhost:3000');
+
+        socket.emit('join', {room: '<%= group.group%>'});  
+
+        console.log('story script')
+
+        let nextRound = document.getElementById("round2");
+        nextRound.addEventListener("click", nextRoundFunction);
+
+        function nextRoundFunction(){
+
+            let data = {
+                room: '<%= group.group%>',
+                nextId: "round2"
+            }
+            socket.emit('nextRound', data)
+            location.href = "/rooms/<%= group._id%>/story";
+        }
+
+
+        socket.on('nextRound', (data) => {
+            let nextButton = document.getElementById(data.nextId);
+            nextButton.style.display = "none";
+            location.href = "/rooms/<%= group._id%>/story"
+        })
+
+    /*let secondRound = document.getElementById("round2");
+secondRound.addEventListener('click', lastRound);
+
+function lastRound(){
+    socket.emit('secondRound')
+    location.href = "/story";
+}
+*/
+
+/*
+
+let round2 = document.getElementById("round2");
+console.log("round 2", round2)
+
+round2.addEventListener("click", () => {
+   
+    console.log('round2 chosen')
+    let data = {id: "round2", room: '<%= group.group%>'}
+    socket.emit('roundTwo', data);
+    //location.href = "/rooms/<%= group._id%>/story";
+})
+
+socket.on('roundTwo', (data) => {
+    console.log('round two chosen');
+    location.href = "/rooms/<%= group._id%>/story"
+})
+*/
+
+    </script>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

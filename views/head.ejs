@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+    <script src="/jquery-3.6.4.min.js"></script>
+    <script src="/bootstrap.min.js"></script>
+</head>
+
+<nav class="navbar sticky-top navbar-expand-lg navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-link active" href="/">Home </a>
+        <a class="nav-link" href="/board">Drawing Board</a>
+
+        <% if(currentUser) { %>
+        <% if (currentUser.userType === "student") { %>
+        <a class="nav-link" href="/rooms">Rooms</a>
+        <% } %>
+        <% } %>
+
+        <% if (!currentUser) { %>
+            <a class="nav-link" href="/login">Login</a>
+            <a class="nav-link" href="/register">Sign Up</a>
+        <% } else { %>
+            <a class="nav-link" href="/logout">Logout</a>
+            <% } %>
+      </div>
+    </div>
+  </nav>

@@ -1,0 +1,99 @@
+<%- include('head')%>
+    <body>
+            
+        <div class="rounds">
+            <h3>Select the first round, and then the second round</h3>
+
+            <button id="round1">ROUND 1</button>
+            <button id="round2">ROUND 2</button>
+        </div>
+       
+    </body>
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    
+   <script>
+    var socket = io('http://localhost:3000');
+
+    socket.emit('join', {room: '<%= group.group%>'});  
+
+    let round1 = document.getElementById("round1");
+console.log("round 1", round1)
+
+round1.addEventListener("click", () => {
+   
+    console.log('round1 chosen')
+    let data = {id: "round1", room: '<%= group.group%>'}
+    socket.emit('roundOne', data);
+    //location.href = "/rooms/<%= group._id %>/startQuiz";
+})
+
+socket.on('notEnough', (data) => {
+    console.log('Not at all enough people have joined room');
+    let mainDiv = document.createElement("div");
+    mainDiv.setAttribute("id", "mainDiv")
+    mainDiv.setAttribute("class", "alert alert-danger");
+    mainDiv.setAttribute("role", "alert");
+    mainDiv.innerHTML = "Not enough people have joined"
+    console.log(mainDiv);
+
+   
+    let message = document.createElement("span");
+
+   // mainDiv.appendChild(message);
+    let close = document.createElement("span");
+    close.setAttribute("id", "closeMessage");
+    close.innerText = "X";
+    console.log('close ', close);
+    mainDiv.appendChild(close);
+   // let messageContent = document.createTextNode("Not enough people have joined the room");
+ //  message.innerText = "Not enough people have joined";
+   //message.setAttribute("id", "notEnough");
+    //console.log('Message element ', message);
+    let theBody = document.getElementsByTagName("body");
+    console.log('th ebody ', theBody[0]);
+    //theBody[0].prepend(close);
+    theBody[0].prepend(mainDiv);
+
+    close.addEventListener("click", closeMessage);
+
+    //theBody.insertBefore(message, theBody[0].firstChild);
+})
+
+function closeMessage(){
+    let messageElement = document.getElementById("notEnough");
+    let closeElement = document.getElementById("closeMessage");
+    let mainDiv = document.getElementById("mainDiv");
+    mainDiv.style.display = "none";
+    messageElement.style.display = "none";
+    closeElement.style.display = "none";
+  
+    
+}
+
+socket.on('roundOne', (data) => {
+    console.log('round One chosen');
+    location.href = "/rooms/<%= group._id%>/startQuiz"
+})
+
+let round2 = document.getElementById("round2");
+console.log("round 2", round2)
+
+round2.addEventListener("click", () => {
+   
+    console.log('round2 chosen')
+    let data = {id: "round2", room: '<%= group.group%>'}
+    socket.emit('roundTwo', data);
+    //location.href = "/rooms/<%= group._id%>/story";
+})
+
+socket.on('roundTwo', (data) => {
+    console.log('round two chosen');
+    location.href = "/rooms/<%= group._id%>/story"
+})
+   </script>
+
+   
+</head>
+</html>

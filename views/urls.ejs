@@ -1,0 +1,113 @@
+<%- include('head')%>
+<body>
+    <h2>Images you've saved</h2>
+
+
+    <div class="spotify-playlists">
+        <% for (let imageUrl of group.imageUrls) { %>
+            <div class="list">
+                <img src="<%= imageUrl%>">
+            </div>
+           
+        <% } %>
+
+    </div>
+
+
+    <div class="textarea">
+ <h5>Type your story here and submit</h5>
+
+    <textarea id="story" name="story" rows="6" cols="40" placeholder="Type your story here"></textarea>
+
+    <button id="submitStory" class="btn">Submit</button>
+
+</div>
+
+
+ <script src="/socket.io/socket.io.js"></script>
+
+    <script src="/script.js"></script>
+    <script>
+        // let room = '<%= group.group%>'
+        let textareaElement = document.getElementById("story");
+        let storySubmitButton = document.getElementById("submitStory");
+        let theGroupId = '<%= group._id%>';
+
+        storySubmitButton.addEventListener("click", storySubmit);
+
+        console.log('story element ', textareaElement)
+
+        textareaElement.addEventListener("input", (e) => {
+            const value = e.target.value ;
+
+            let data = {
+                room: '<%= group.group%>',
+                value: value,
+                textAreaId: "story"
+            }
+
+            console.log('value typed is ', value);
+            socket.emit('startStory', data)
+        });
+
+        function transferStory(){
+            let storyUpdated = story.value
+            let data = {
+                storyId : "story",
+                updatedStory: storyUpdated,
+                room: '<%= group.group%>'
+            }
+            socket.emit('startStory', data)
+        }
+
+        async function storySubmit(){
+            const saveResponse = await fetch(`/rooms/${theGroupId}/urls/story`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+            },
+                body: JSON.stringify({
+                    story: textareaElement.value
+            })
+            })
+
+   
+       if(!saveResponse.ok){
+            throw new Error('image could not be saved');
+       }
+
+       let data = {
+        room: '<%= group.group %>',
+        story: textareaElement.value,
+        storyId: "submitStory"
+       }
+
+       socket.emit('submitStory', data);
+
+       //window.location = "/finishedStory";
+
+       if (saveResponse.redirected) {
+    window.location.href = saveResponse.url;
+  } 
+
+}
+
+socket.on('submittingStory', (data) => {
+            console.log('submitting story');
+            let theButton = document.getElementById(data.storyId);
+            theButton.style.display = "none";
+            window.location = "/finishedStory";
+       })
+
+        socket.emit('join', {room: '<%= group.group%>'}); 
+
+        socket.on('copyStory', (data) => {
+            console.log('copyin the story')
+            console.log(data)
+            let tAElement = document.getElementById(data.textAreaId);
+            tAElement.value = data.value;
+            
+        })
+    </script>
+</body>
+</html>

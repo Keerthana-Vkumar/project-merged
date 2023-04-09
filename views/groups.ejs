@@ -1,0 +1,20 @@
+<%- include('head')%>
+<body>
+    
+    <% for (let i = 0;  i< groups.length; i++) { %>
+        <div class="card" mb-3>
+            <div class="row">
+                <div class="card-body">
+                    <p class="card-text"><%= %></p>
+                    <a href="/groups/<%= groups[i]._id %>">Group <%= i+1%></a>
+                   
+                </div>
+            </div>
+            </div>
+        <% } %>
+
+
+   
+    
+</body>
+</html>

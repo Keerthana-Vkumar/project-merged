@@ -1,0 +1,51 @@
+<%- include('head')%>
+<body>
+
+<div class="container">
+    <div class="card" mb-3>
+        <div class="row">
+            <div class="card-body">
+                <h4>Group:  <%= group.group%></h4> <br>
+
+        <h4>Students: </h4>
+        <div class=" student1 container">
+            <h4>Student 1</h4>
+            <h4> Username:  <%= group.student1.name%></h4>
+        </div>
+       
+
+        <div class="container">
+            <h4>Student 2</h4>
+        <h4>Username: Name: <%= group.student1.name%></h4>
+
+        </div><br>
+        
+        <h4>Time Taken - <%= group.timeTaken.minutes%> :  <%= group.timeTaken.seconds%>
+           </h4>
+        <h4>Score: <%= group.quizScore%></h4>
+
+        <% if (group.imageUrls.length > 0 ) { %>
+            <div class="spotify-playlists">
+                <% for (let image of group.imageUrls) { %>
+                    <div class="list">
+                        <img src="<%= image%>">
+                    </div>
+                   
+                <% } %>
+            </div>
+        <% } %>
+
+        <h4>Essay: <%= group.story%></h4>
+
+        
+
+               
+            </div>
+        </div>
+        </div>
+    </div>
+
+
+
+</body>
+</html>

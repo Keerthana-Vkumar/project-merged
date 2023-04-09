@@ -1,0 +1,38 @@
+<%- include('head')%>
+<body>
+<form action="/groups/<%= id%>/students" method="POST" id="addStudent">
+    <h2>add group</h2>
+
+
+    <div class="form-group row">
+    <label for="student1" class="form-label">Students</label>
+
+    <select id="student1" name="student1" class="form-control">
+       
+        <% for (let student of students ) { %>
+            <option value="<%= student.username%>"><%= student.username%></option>
+            
+        <% } %>
+        
+    </select>
+</div>
+
+<div class="form-group row">
+    
+    <label for="student2" class="form-label">Students</label>
+    <select id="student2" name="student2" class="form-control">
+       
+        <% for (let student of students ) { %>
+            <option value="<%= student.username%>"><%= student.username%></option>
+            
+        <% } %>
+        
+    </select>
+</div>
+
+
+    <button class="btn">Save Group</button>
+    
+</form>
+</body>
+</html>

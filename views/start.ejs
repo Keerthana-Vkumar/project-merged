@@ -1,0 +1,25 @@
+<%- include('head')%>
+<body>
+ 
+
+    <a id="startQuizLink" href="/rooms/<%= group._id%>/startQuiz">Start</a>
+
+    <button id="startQuizButton">Start Quiz</button>
+
+    <script>
+        var socket = io('http://localhost:3000');
+
+        let startQuizButton = document.getElementById("startQuizButton");
+        startQuizButton.addEventListener("click", startQuiz)
+
+        function startQuiz(){
+            let data = {
+                startQuizButtonId : "startQuizButton",
+
+            }
+        }
+
+    </script>
+
+
+</body>

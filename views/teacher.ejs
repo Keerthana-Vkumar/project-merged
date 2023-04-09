@@ -1,0 +1,18 @@
+<%- include('head')%>
+<body>
+
+    <div id="teacherPage" class="container">
+        <h4>Students Without A group</h4>    
+        <% for (let i = totalStudents.length - 1; i >= (allStudents.length ); i--) { %>
+      <h5>Username: <%= totalStudents[i].username%></h5>
+      <h5>Name: <%= totalStudents[i].name%></h5>
+        <% } %>
+      
+      <a class="btn" href="/groups">View All Groups</a>
+    
+    </div>
+   
+
+
+</body>
+</html>

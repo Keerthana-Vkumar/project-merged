@@ -1,0 +1,24 @@
+<%- include('head')%>
+<body>
+
+   
+       
+<form action="/login" id="loginForm" method="POST" class="login-form">
+    <h2>Login</h2>
+    <label for="username">Username:</label>
+    <input type="text" name="username" id="username" required/>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required/>
+    
+    <div>
+        <label for="student">Student</label>
+        <input type="radio" name="userType" id="student" value="student"/>
+    </div>
+    <div>
+        <label for="professor">Professor</label>
+        <input type="radio" name="userType" id="professor" value="professor"/>
+    </div>
+    <input type="submit" value="Login"/>
+</form>
+</body>
+</html>
