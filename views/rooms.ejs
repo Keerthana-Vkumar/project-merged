@@ -4,8 +4,15 @@
     <div class="container">
         <div id="rooms">
             <h2>Join rooms</h2>
+
+            <% if (group.group) { %>
         
         <a id="joinRoom" class="btn" href="/rooms/<%= group._id %>"><%= group.group %></a>
+
+        <% } else { %>
+
+            <h4>You have not yet been allotted a group</h4>
+            <% } %>
         </div>
         
     </div>

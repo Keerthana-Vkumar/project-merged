@@ -14,7 +14,8 @@
 
     
    <script>
-    var socket = io('http://localhost:3000');
+    //var socket = io('http://localhost:3000');
+    var socket = io('https://cryptic-anchorage-13951.herokuapp.com');
 
     socket.emit('join', {room: '<%= group.group%>'});  
 
