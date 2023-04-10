@@ -194,7 +194,7 @@ app.post('/login', (req, res) => {
 
 app.get("/group", isLoggedIn, async (req, res) => {
     let students = await Student.find({});
-    const groups = students.length / 2;
+    const groups = (students.length / 2) + 1 ;
     res.render('addgroup', {groups});
 })
 
