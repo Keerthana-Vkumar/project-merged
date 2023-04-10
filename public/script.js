@@ -105,7 +105,7 @@ const handleSubmit = async (e) => {
     loader(messageDiv);
     
 
-    const response = await fetch('http://localhost:3000/chat', {
+    const response = await fetch('https://cryptic-anchorage-13951.herokuapp.com/chat', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
