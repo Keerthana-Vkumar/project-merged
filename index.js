@@ -15,6 +15,9 @@ const flash = require("connect-flash");
 const LocalStrategy = require('passport-local');
 const httpServer = require("http").createServer();
 
+
+dotenv.config();
+
 const {isLoggedIn} = require("./middleware");
 
 const Group = require('./models/group');
@@ -85,7 +88,6 @@ const db = mongoose.connection;
 db.on('error', console.error)
 
 
-dotenv.config();
 
 
 app.use(cors());
