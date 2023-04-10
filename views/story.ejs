@@ -107,7 +107,7 @@ function onSubmit(e){
 async function generateImageRequest(prompt, size){
     try{
 
-        const response = await fetch('http://localhost:3000', {
+        const response = await fetch('https://cryptic-anchorage-13951.herokuapp.com', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
