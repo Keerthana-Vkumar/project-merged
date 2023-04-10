@@ -237,8 +237,9 @@ app.post("/groups/:id/students", isLoggedIn, async (req, res) => {
     group.student1 = stud1
     group.student2 = stud2
     await group.save()
-    res.send(group);
     res.redirect('/groups');
+    res.send(group);
+   
 
 })
 
