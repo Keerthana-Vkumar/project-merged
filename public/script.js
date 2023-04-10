@@ -4,7 +4,8 @@ let room = window.room;
 let myScore = window.score;
 let groupId = window.id;
 
-var socket = io('http://localhost:3000');
+//var socket = io('http://localhost:3000');
+var socket = io('https://cryptic-anchorage-13951.herokuapp.com');
 
 
 let stopWatch;
