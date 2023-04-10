@@ -27,10 +27,10 @@
         <input id="brush-slider" type="range" min="1" max="50" value="2">
         <span id="brush-size">2</span>
     </div>
-    <button class="gradeBtn" id="grade-btn">Grading</button>
+    <!-- <button class="gradeBtn" id="grade-btn">Grading</button> -->
     <button class="backBtn" id="back-btn">back</button>
 </div>
-<div class="form-container">
+<!-- <div class="form-container">
     <form
             class="grade-form"
             id="gradeForm"
@@ -42,7 +42,7 @@
         <input type="number" name="grade" id="grade" required/>
         <input type="submit" value = "Submit" />
     </form>
-</div>
+</div> -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
 <script>
@@ -76,13 +76,13 @@
     const brushSizeDisplay = document.getElementById("brush-size");
     const brushSliderContainer = document.getElementById("brush-slider-container");
     const backBtn = document.getElementById("back-btn");
-    const gradeForm = document.getElementById("gradeForm");
-    const gradeBtn = document.getElementById("grade-btn");
+   // const gradeForm = document.getElementById("gradeForm");
+   // const gradeBtn = document.getElementById("grade-btn");
     let joinedName = '<%= username %>';
     console.log("hahahah")
     console.log(joinedName)
     const formContainer = document.querySelector(".form-container");
-    formContainer.style.display = "none";
+   // formContainer.style.display = "none";
 
 
     brushBtn.addEventListener("click", () => {
@@ -157,9 +157,9 @@
         window.location.href = `/?username=${username}`;
     });
 
-    gradeBtn.addEventListener("click", () => {
+    /*gradeBtn.addEventListener("click", () => {
         formContainer.style.display = formContainer.style.display === "none" ? "block" : "none";
-    });
+    });*/
 
     socket.on('ondraw', ({x, y, color, lineWidth}) => {
         ctx.beginPath();

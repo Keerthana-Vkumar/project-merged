@@ -22,13 +22,28 @@ const Student = require('./models/student');
 const Teacher = require("./models/teacher")
 
 const userRoutes = require('./routes/auth/users');
+//const dbUrl = process.env.DB_URL
+
+const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/whiteboard';
+const MongoDBStore = require('connect-mongo');
+
+const secret = process.env.SECRET || 'secret';
 
 const app = express();
 
+const store = MongoDBStore.create({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    secret
+    })
 
+store.on('error', function (e) {
+    console.log("SESSION STORE ERROR", e);
+})
 
 const sessionConfig = {
-    secret: 'secret',
+    store,
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -57,7 +72,7 @@ passport.serializeUser(function(user, done) {
   });
 
 
-mongoose.connect("mongodb://127.0.0.1:27017/whiteboard", {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(dbUrl, {useNewUrlParser: true, useUnifiedTopology: true})
 .then(() => {
     console.log('MONGO CONNECTION OPEN!!');
 })
@@ -318,7 +333,7 @@ app.get("/teacher", isLoggedIn, async (req, res) => {
     }
     console.log(allStudents);
 
-    let allStudentIds = allStudents.map(student => student._id);
+   // let allStudentIds = allStudents.map(student => student._id);
   
 
     /*
@@ -335,9 +350,9 @@ app.get("/teacher", isLoggedIn, async (req, res) => {
 
    const remainingStudents = totalStudents.length - allStudents.length;
 
-    let leftStudents = totalStudents.filter(student => !allStudentIds.includes(student.toString()));
+    //let leftStudents = totalStudents.filter(student => !allStudentIds.includes(student.toString()));
     
-    console.log('Remaining students ', leftStudents);
+    //console.log('Remaining students ', leftStudents);
     res.render("teacher.ejs", {totalStudents, allStudents});
 })
 

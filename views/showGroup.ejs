@@ -7,16 +7,25 @@
             <div class="card-body">
                 <h4>Group:  <%= group.group%></h4> <br>
 
+                <% if (group.student1) { %>
+
         <h4>Students: </h4>
         <div class=" student1 container">
             <h4>Student 1</h4>
             <h4> Username:  <%= group.student1.name%></h4>
         </div>
+
+        <% } %>
        
 
+        <% if (group.student2) { %>
         <div class="container">
             <h4>Student 2</h4>
-        <h4>Username: Name: <%= group.student1.name%></h4>
+        <h4>Username: Name: <%= group.student2.name%></h4>
+
+        <% } %>
+
+        <a class="btn" href="/groups/<%= group._id%>/students/new">Add a Student</a>
 
         </div><br>
         
