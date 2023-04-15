@@ -194,7 +194,7 @@ let distance;
 
 
 function countdown(){
-    let countDownDate = new Date(startTime + 1 * 60 * 1000);
+    let countDownDate = new Date(startTime + 2 * 60 * 1000);
     //console.log('stop time ', countDownDate);
     let now = new Date().getTime();
     

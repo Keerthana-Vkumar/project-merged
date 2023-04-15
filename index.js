@@ -571,6 +571,7 @@ io.on('connection', (socket) => {
         socket.broadcast.to(data.room).emit('savedImages', data)
     })
 
+    /*
     socket.on('roundTwo', (data) => {
         console.log('roundtwo event')
         const myRoom = io.sockets.adapter.rooms.get(data.room);
@@ -589,6 +590,7 @@ io.on('connection', (socket) => {
         }
         
     })
+    */
 
 
     socket.on('click', (data) => {
