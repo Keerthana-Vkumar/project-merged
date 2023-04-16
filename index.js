@@ -326,10 +326,6 @@ app.get("/rooms/:id/timer", async (req, res) => {
     res.render("timer.ejs", {group});
 })
 
-/*app.post('/resetScore', (req, res) => {
-    console.log('this is reset score route');
-})
-*/
 
 // Get route to display page after quiz round
 app.get("/rooms/:id/finishedQuiz", async (req, res) => {
