@@ -13,7 +13,6 @@ const session = require('express-session');
 const passport = require("passport");
 const flash = require("connect-flash");
 const LocalStrategy = require('passport-local');
-const httpServer = require("http").createServer();
 
 
 dotenv.config();
@@ -23,9 +22,6 @@ const {isLoggedIn} = require("./middleware");
 const Group = require('./models/group');
 const Student = require('./models/student');
 const Teacher = require("./models/teacher")
-
-const userRoutes = require('./routes/auth/users');
-//const dbUrl = process.env.DB_URL
 
 const dbUrl = process.env.DB_URL || 'mongodb://127.0.0.1:27017/whiteboard';
 const MongoDBStore = require('connect-mongo');
@@ -69,7 +65,7 @@ passport.serializeUser(function(user, done) {
     done(null, user);
   });
 
-  passport.deserializeUser(function(user, done) {
+passport.deserializeUser(function(user, done) {
     if(user!=null)
       done(null,user);
   });
@@ -86,7 +82,6 @@ mongoose.connect(dbUrl, {useNewUrlParser: true, useUnifiedTopology: true})
 
 const db = mongoose.connection;
 db.on('error', console.error)
-
 
 app.use(cors());
 app.use(express.json())
@@ -115,8 +110,7 @@ const openai = new OpenAIApi(configuration);
 
 app.use((req, res, next) => {
     const currentUser = req.user;
-   res.locals.currentUser = currentUser;
-  // console.log('Current user is ', currentUser);
+    res.locals.currentUser = currentUser;
     next();
 })
 
@@ -130,16 +124,16 @@ app.get('/register', (req, res) => {
     res.render('register')
 })
 
+//Post route to handle registration of new user
 app.post('/register', async (req, res) => {
     try{
-        console.log('in register route req.body is ', req.body);
         const {name, username, password, userType} = req.body;
         if (userType === "student"){
             const user = new Student({name, username});
             const registeredStudent = await Student.register(user, password);
             req.login(registeredStudent, err => {
                 if (err) return next(err);
-                console.log(registeredStudent);
+                
             res.redirect("/");
             })
         } else if (userType === "professor"){
@@ -147,7 +141,7 @@ app.post('/register', async (req, res) => {
             const registeredTeacher = await Teacher.register(user, password);
             req.login(registeredTeacher, err => {
                 if (err) return next(err);
-                console.log(registeredTeacher);
+                
             res.redirect("/teacher");
             })
         }
@@ -168,11 +162,11 @@ app.get("/logout", (req, res) => {
     res.redirect("/")
 })
 
-
+// Post route to handle user login
 app.post('/login', (req, res) => {
     console.log('login route')
     if (req.body.userType === 'student') {
-        console.log('student')
+        
         passport.authenticate('studentLocal')(req, res, function () {
             const redirectUrl = req.session.returnTo || '/'
             res.redirect("/");
@@ -180,7 +174,7 @@ app.post('/login', (req, res) => {
 
 
     } else if (req.body.userType === 'professor') {
-        console.log('teacher')
+        
         passport.authenticate('teacherLocal')(req, res, function () {
             const redirectUrl = req.session.returnTo || '/'
             res.redirect("/teacher");
@@ -188,45 +182,45 @@ app.post('/login', (req, res) => {
     }
 })
 
-
+// Route to render form to add new group
 app.get("/group", isLoggedIn, async (req, res) => {
     let students = await Student.find({});
     const groups = (students.length / 2) + 1 ;
     res.render('addgroup', {groups});
 })
 
+// Post route handle adding new group
 app.post("/group", isLoggedIn, async (req, res) => {
-    console.log('in add grooup');
-    console.log(req.body);
-
     const group = new Group(req.body);
-    console.log('the group ', group);
     await group.save()
     res.redirect("/groups");
 })
 
+// Get route to render all the groups
 app.get("/groups", isLoggedIn, async (req, res) => {
     const groups = await Group.find({});
     res.render("groups", {groups})
 })
 
+// Get route to render individual group details
 app.get("/groups/:id", isLoggedIn, async (req, res) => {
     const group = await Group.findById(req.params.id).populate('student1').populate('student2');
     console.log('the group is ', group);
     res.render("showGroup", { group })
 })
 
+// Get route to render form to add students to group
 app.get('/groups/:id/students/new', isLoggedIn, async (req, res) => {
     const students = await Student.find({});
     const { id } = req.params;
     res.render('addstudent', {id, students});
 })
 
+// Post route to handle addition of students to group
 app.post("/groups/:id/students", isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const group = await Group.findById(id);
     const { student1, student2 } = req.body;
-    console.log('students ', req.body);
     const stud1 = await Student.findOne({ username: student1})
     const stud2 = await Student.findOne({ username: student2})
     group.student1 = stud1
@@ -237,37 +231,33 @@ app.post("/groups/:id/students", isLoggedIn, async (req, res) => {
 
 })
 
+// Post route to handle saving of image URLs array to database 
 app.post("/rooms/:id/urls", isLoggedIn, async (req, res) => {
     const {id} = req.params;
     const group = await Group.findById(id);
 
     try{
-        console.log('in post request');
         const imageUrl = req.body.imageUrl;
         console.log('the image url is ',imageUrl)
-
         group.imageUrls.push(imageUrl);
         await group.save();
-        console.log('updated group is ', group);
         res.redirect(`/rooms/${id}/story`);
 
     } catch (e) {
         console.log(e);
         res.status(500).send({e});
     }
-
 })
 
-
+// Get route to render page to review added image URLs and complete essay 
 app.get("/rooms/:id/urls", isLoggedIn, async (req, res) => {
-    console.log('get urls request')
     const {id} = req.params;
     const group = await Group.findById(id);
     res.render('urls', {group});
 })
 
+// Post route to save essay in database
 app.post("/rooms/:id/urls/story", isLoggedIn, async (req, res) => {
-    console.log('submit story route');
     const {id} = req.params;
     const group = await Group.findById(id);
 
@@ -275,34 +265,32 @@ app.post("/rooms/:id/urls/story", isLoggedIn, async (req, res) => {
         const story = req.body.story;
         group.story = story;
         await group.save();
-        console.log('trying to save the story')
         res.redirect('/finishedStory');
     } catch (e) {
         console.log(e);
         res.status(500).send({e});
-
     }
 })
 
+// Get route to render page after completing final round
 app.get("/finishedStory", isLoggedIn, (req, res) => {
     res.render("finishedStory");
 })
 
-
+// Get route to display alloted group 
 app.get("/rooms", isLoggedIn, async (req, res) => {
-     if(req.user.userType === "student"){
-        
+     if(req.user.userType === "student"){        
             const group = await Group.findOne({ $or: [{ student1: req.user._id}, { student2: req.user._id}]});
-            res.render('rooms.ejs', {group});       
-         
-     }
-     
+            res.render('rooms.ejs', {group});                
+     }     
  })
 
+ // Get route to display home page if user is a student
 app.get("/student", isLoggedIn, (req, res) => {
     res.render("student.ejs")
 })
 
+// Get route to display home page if user is a teacher
 app.get("/teacher", isLoggedIn, async (req, res) => {
     console.log('calling teacher')
     let totalStudents = []
@@ -315,7 +303,7 @@ app.get("/teacher", isLoggedIn, async (req, res) => {
 
     let allStudents = []
     const allGroups = await Group.find();
-    console.log('all students ', allGroups);
+ 
     for(let group of allGroups){
         console.log('group is ', group)
         allStudents.push(group.student1)
@@ -323,25 +311,27 @@ app.get("/teacher", isLoggedIn, async (req, res) => {
     }
     console.log(allStudents);
 
-   console.log('Length of groups ', allStudents.length);
-   console.log('Length of total students ', totalStudents.length);
+    console.log('Length of groups ', allStudents.length);
+    console.log('Length of total students ', totalStudents.length);
 
-   const remainingStudents = totalStudents.length - allStudents.length;
+    const remainingStudents = totalStudents.length - allStudents.length;
 
     res.render("teacher.ejs", {totalStudents, allStudents});
 })
 
+
+// Get route to display page if quiz has timed out
 app.get("/rooms/:id/timer", async (req, res) => {
     const group = await Group.findById(req.params.id);
-    console.log("timer over");
     res.render("timer.ejs", {group});
-
 })
 
-app.post('/resetScore', (req, res) => {
+/*app.post('/resetScore', (req, res) => {
     console.log('this is reset score route');
 })
+*/
 
+// Get route to display page after quiz round
 app.get("/rooms/:id/finishedQuiz", async (req, res) => {
     const myMinutes = req.query.myMinutes;
     const mySeconds = req.query.mySeconds;
@@ -351,18 +341,20 @@ app.get("/rooms/:id/finishedQuiz", async (req, res) => {
     group.timeTaken.minutes = myMinutes;
     group.timeTaken.seconds = mySeconds;
     await group.save();
-    console.log('From finished quiz route: end time ', myMinutes, mySeconds);
-    console.log('from finished quiz: score ', group.quizScore);
+    
     const quizLength = questions.length;
     score = 0;
     res.render("finishedQuiz.ejs", {myMinutes, mySeconds, score: group.quizScore, quizLength, group})
 })
 
+// Get route to display page to start round one
 app.get("/rooms/:id", isLoggedIn, async (req, res) => {
     const group = await Group.findById(req.params.id);
     res.render("rounds.ejs", { group });
 })
 
+
+/*
 app.get("/rooms/:id/start", isLoggedIn, async (req, res) => {
     console.log('id is ', req.params.id);
     const group = await Group.findById(req.params.id);
@@ -370,23 +362,23 @@ app.get("/rooms/:id/start", isLoggedIn, async (req, res) => {
     res.render("start.ejs", {group});
 
 })
+*/
 
+// Get route to display quiz 
 app.get("/rooms/:id/startQuiz", isLoggedIn, async (req, res) => {
     const {id} = req.params;
-    console.log('id is this ', id);
     const group = await Group.findById(id);
-   res.render("group1.ejs", { group });
+    res.render("group1.ejs", { group });
 })
 
-
+// Get route to display round 2
 app.get("/rooms/:id/story", isLoggedIn, async (req, res) => {
     const {id} = req.params;
-    console.log('id is this ', id);
     const group = await Group.findById(id);
     res.render("story.ejs", { group });
 })
 
-
+// Post request to handle response from chatbot
 app.post("/chat", async (req, res) => {
     try{
         console.log('in post request');
@@ -411,6 +403,7 @@ app.post("/chat", async (req, res) => {
     }
 })
 
+// Post request to handle image generation 
 app.post("/", async (req, res) => {
     const {prompt, size} = req.body;
 
@@ -437,27 +430,25 @@ app.post("/", async (req, res) => {
     }
 })
 
-
-
+/*
 app.post("/urls", async (req, res) => {
     const {url1, url2, url3} = req.body;
-
-    console.log('urls are ', url1, url2, url3)
     res.redirect("/urls");
 })
+*/
 
+// Get request to render page to display image URL and essay 
 app.get("/urls", async (req, res) => {
     const group = await Group.find({});
     res.render("/urls", {group});
 })
 
+// Get request to render whiteboard
 app.get("/board",isLoggedIn, (req, res) => {
     let data = req.user.username;
     console.log(data)
     res.render('board', {username:data});
-}
-);
-
+});
 
 
 const questions = [
@@ -489,65 +480,57 @@ io.on('connection', (socket) => {
 
     musers.push(user);
 
+    // Listening to client event emiited to join room  
     socket.on('join', (data) => {
-
         socket.join(data.room);           
         io.to(data.room).emit('firstLoadQuestions', questions);
     })
 
+    // Listening to client emitted event to load questions
     socket.on('submitQuestion', (sendData) => {
-        console.log('Data ', sendData.data);
-        console.log('Id ', sendData.elementId);
-        console.log('Prompt ', sendData.myPrompt);
         socket.broadcast.emit('broadcastAnswer', sendData);
     })
 
-    socket.on('roundOne', (data) => {
-        console.log('Dtata is here ', data);
-        console.log('roundone event ', io.sockets.adapter.rooms[data.room])
+// Socket event to handle if client can proceed to to round one depending on number of users joined in the room
+    socket.on('roundOne', (data) => {        
         const myRoom = io.sockets.adapter.rooms.get(data.room);
         const numUsers = myRoom ? myRoom.size : 0;
-        console.log('users ', numUsers)
 
-        if (numUsers >= 2){
-            console.log('real event ')
+        if (numUsers >= 2){            
             io.to(data.room).emit('roundOne', data)
         } else {
-            let data = { numUsers };
-            console.log('not enough people joined to room ');
-            socket.emit('notEnough', data);
-            console.log('not enough emitted')
-        }
-       
+            let data = { numUsers };            
+            socket.emit('notEnough', data);            
+        }       
     })
 
+// Socket event to handle display of images for other group members
     socket.on('savedImages', (data) => {
-        console.log('saved Images ')
         socket.broadcast.to(data.room).emit('savedImages', data)
     })
 
-
+      // Socket event to update timer for every group member
     socket.on('click', (data) => {
         socket.broadcast.to(data.room).emit('updateTimer', data);
     })
 
+  
     socket.on('time', data => {
         socket.broadcast.emit('displayTime', data);
     })
 
-
-
-    socket.on('resetScore', (score) => {
+   /* socket.on('resetScore', (score) => {
         score = 0;
     })
+    */
 
+    // Socket event to redirect users to page after completing quiz
     socket.on('redirectOthers', (data) => {
         console.log('trying to redirect');
         socket.broadcast.to(data.room).emit('redirectedOthers', data)
     })
 
     socket.on('answer', (data) => {
-
         socket.broadcast.to(data.room).emit('updateAnswer', data);
 
         const selectedAnswer = data.selectedAnswer;
@@ -558,70 +541,57 @@ io.on('connection', (socket) => {
 socket.on('updateScore', (isCorrect) => {
     if (isCorrect){
         score++;
-        console.log("Sore is now "+score);
 }
 })
 
-
-
+// Socket event to update UI in quiz round
 socket.on('buttonClicked', (data) => {
     socket.broadcast.to(data.room).emit('updateUi', data);
 })
 
-
-socket.on('handling-next-button', (data) => {
-
-    console.log('index', currentQuestionIndex);
-    console.log('Questions length'+questions.length);
+// Socket event to progress to next question
+socket.on('handling-next-button', (data) => {    
     let value = 0;
+
     if(data.currentQuestionIndex < questions.length){
-        console.log('Case 1 where more questions')
         value = 0;
         io.to(data.room).emit('loadQuestions', questions);
-        console.log('display next question');
         return;
-        }
-        else{
-           value = 1;
-
-            socket.to(data.room).emit('score', {score, questions});
-
-           io.to(data.room).emit('score', {score, questions});
-           console.log('after emitting score from index');
-        }
+    } else {
+        value = 1;
+        socket.to(data.room).emit('score', {score, questions});
+        io.to(data.room).emit('score', {score, questions});
+    }
     })
 
+    // Socket event to handle progress to second round
     socket.on('nextRound', (data) => {
         console.log(data);
         socket.broadcast.to(data.room).emit('nextRound', data);
     })
 
+
+    // Socket event to copy prompt entered to generate image to all group members
     socket.on('formSubmit', (data) => {
-        console.log(data.pId);
-        console.log(data.sId);
-        console.log(data.pValue);
-        console.log(data.sValue);
         socket.broadcast.emit('fillDetails', data);
     })
 
+    // Socket even to transfer same image URL to other clients
     socket.on('generateImage', (sendData) => {
-        console.log('Url ', sendData.imageUrl);
-        console.log('Id ', sendData.id);
         socket.broadcast.to(sendData.room).emit('transferImage', sendData);
     })
 
+    // Socket event to display essay written in real-time to other members
     socket.on('startStory', (data) => {
-        console.log('start story data is ', data);
         socket.broadcast.to(data.room).emit('copyStory', (data));
     })
 
     socket.on('showUrl', (data) => {
-        console.log('show url index ')
         socket.broadcast.to(data.room).emit('showingUrl', data)
     })
 
+    // Socket event to handle essay submission
     socket.on('submitStory', (data) => {
-        console.log('submit story');
         socket.broadcast.to(data.room).emit('submittingStory', data);
     })
 

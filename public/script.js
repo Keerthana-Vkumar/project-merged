@@ -365,7 +365,7 @@ function redirectPage(score){
 }
 
 socket.on('redirectedOthers', ({link, submitQuizId}) => {
-    console.log('redirected others');
+    //console.log('redirected others');
     document.getElementById(submitQuizId).click();
     location.href = link;
 })
