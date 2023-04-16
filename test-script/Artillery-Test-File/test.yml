@@ -1,0 +1,89 @@
+config:
+  target: "https://cryptic-anchorage-13951.herokuapp.com/"
+  engines:
+    socketio-v3: { }
+  phases:
+    - duration: 10
+      arrivalRate: 100
+  stats:
+    latency:
+      percentiles:
+        - 50
+        - 90
+        - 99
+    responseTime:
+      percentiles:
+        - 50
+        - 90
+        - 99
+  socketio:
+    transports: [ "websocket" ]
+scenarios:
+  - name: My Socket.IO test
+    engine: socketio-v3
+    flow:
+      - emit:
+          - channel: "user_joined"
+          - data: '{"id": "{{ $uuid }}", "username": "User{{ $randomString }}"}'
+      - emit:
+          channel: "requestDrawingData"
+      - emit:
+          - channel: "disconnect"
+      - emit:
+          - channel: "draw"
+      - emit:
+          - channel: "segmentStart"
+      - emit:
+          - channel: "down"
+          - data: '{ x": 50, "y": 50, "color": "red", "lineWidth": 1 }'
+      - emit:
+          - channel: "start_timer"
+      - emit:
+          - channel: "user_left"
+          - data: '{"id": "{{ $uuid }}", "username": "User{{ $randomString }}"}'
+      - emit:
+          - channel: "erase"
+          - data: '{ x": 50, "y": 50, "color": "red", "size": 1 }'
+      - emit:
+          channel: "join"
+          data:
+            room: "test-room"
+      - emit:
+          - channel: "submitQuestion"
+          - data: '{}'
+          - emit:
+              channel: "join"
+              data:
+                room: "test-room"
+          - think: 2
+          - emit:
+              channel: "roundOne"
+              data:
+                room: "test-room"
+
+      - emit:
+          - channel: "click"
+      - emit:
+          - channel: "time"
+          - data: '{"time": 200}'
+      - emit:
+          - channel: "redirectOthers"
+      - emit:
+          - channel: "answer"
+      - emit:
+          - channel: "updateScore"
+          - data: "True"
+      - emit:
+          - channel: "buttonClicked"
+      - emit:
+          - channel: "handling-next-button"
+      - emit:
+          - channel: "formSubmit"
+      - emit:
+          - channel: "generateImage"
+      - emit:
+          - channel: "startStory"
+      - emit:
+          - channel: "showUrl"
+      - emit:
+          - channel: "submitStory"
