@@ -5,8 +5,8 @@ To compile and run the application locally, set the URL of the socket.io host to
 Open the terminal window under the working directory and type:<br />
 ```$npm install```<br />
 This step will help you obtain all the  dependencies.<br />
-Next, use the following command, as this is the entry point of our application:
-nodemon index.js<br />
+Next, use the following command, as this is the entry point of our application: <br />
+```$nodemon index.js```<br />
 ## Test tools ##
 ### Jmeter : <br />
 1. Open jmx file provided above inside the ```/backups``` directory in Jmeter's root location to run the tests.<br />
