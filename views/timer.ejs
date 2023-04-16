@@ -36,34 +36,6 @@
             location.href = "/rooms/<%= group._id%>/story"
         })
 
-    /*let secondRound = document.getElementById("round2");
-secondRound.addEventListener('click', lastRound);
-
-function lastRound(){
-    socket.emit('secondRound')
-    location.href = "/story";
-}
-*/
-
-/*
-
-let round2 = document.getElementById("round2");
-console.log("round 2", round2)
-
-round2.addEventListener("click", () => {
-   
-    console.log('round2 chosen')
-    let data = {id: "round2", room: '<%= group.group%>'}
-    socket.emit('roundTwo', data);
-    //location.href = "/rooms/<%= group._id%>/story";
-})
-
-socket.on('roundTwo', (data) => {
-    console.log('round two chosen');
-    location.href = "/rooms/<%= group._id%>/story"
-})
-*/
-
     </script>
 
     <script src="script.js"></script>

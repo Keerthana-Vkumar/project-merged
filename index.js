@@ -88,8 +88,6 @@ const db = mongoose.connection;
 db.on('error', console.error)
 
 
-
-
 app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
@@ -122,9 +120,6 @@ app.use((req, res, next) => {
     next();
 })
 
-
-
-//app.use('/', userRoutes);
 
 app.get("/", (req, res) => {
     res.render('home');
@@ -239,15 +234,12 @@ app.post("/groups/:id/students", isLoggedIn, async (req, res) => {
     await group.save()
     res.redirect('/groups');
     res.send(group);
-   
 
 })
 
 app.post("/rooms/:id/urls", isLoggedIn, async (req, res) => {
     const {id} = req.params;
     const group = await Group.findById(id);
-   // res.send('post route');
-
 
     try{
         console.log('in post request');
@@ -270,10 +262,7 @@ app.post("/rooms/:id/urls", isLoggedIn, async (req, res) => {
 app.get("/rooms/:id/urls", isLoggedIn, async (req, res) => {
     console.log('get urls request')
     const {id} = req.params;
-  //  console.log('id is this ', id);
     const group = await Group.findById(id);
-
-    //console.log('the group here is ', group);
     res.render('urls', {group});
 })
 
@@ -287,7 +276,6 @@ app.post("/rooms/:id/urls/story", isLoggedIn, async (req, res) => {
         group.story = story;
         await group.save();
         console.log('trying to save the story')
-       // console.log('updated group is ', group);
         res.redirect('/finishedStory');
     } catch (e) {
         console.log(e);
@@ -302,11 +290,9 @@ app.get("/finishedStory", isLoggedIn, (req, res) => {
 
 
 app.get("/rooms", isLoggedIn, async (req, res) => {
-    // console.log('in rooms ', req.user);
      if(req.user.userType === "student"){
         
             const group = await Group.findOne({ $or: [{ student1: req.user._id}, { student2: req.user._id}]});
-            //console.log('users group is ', group)
             res.render('rooms.ejs', {group});       
          
      }
@@ -337,26 +323,11 @@ app.get("/teacher", isLoggedIn, async (req, res) => {
     }
     console.log(allStudents);
 
-   // let allStudentIds = allStudents.map(student => student._id);
-  
-
-    /*
-    for(let ele of totalStudents){
-        for (let stud of allStudents){
-            if (ele != stud){
-                leftStudents.push(ele);
-            }
-        }
-    }
-    */
    console.log('Length of groups ', allStudents.length);
    console.log('Length of total students ', totalStudents.length);
 
    const remainingStudents = totalStudents.length - allStudents.length;
 
-    //let leftStudents = totalStudents.filter(student => !allStudentIds.includes(student.toString()));
-    
-    //console.log('Remaining students ', leftStudents);
     res.render("teacher.ejs", {totalStudents, allStudents});
 })
 
@@ -384,17 +355,11 @@ app.get("/rooms/:id/finishedQuiz", async (req, res) => {
     console.log('from finished quiz: score ', group.quizScore);
     const quizLength = questions.length;
     score = 0;
-    //console.log('the score is ', score);
-    //console.log('the score from database is ', group.quizScore);
-    //console.log('th eupdated group is ', group)
     res.render("finishedQuiz.ejs", {myMinutes, mySeconds, score: group.quizScore, quizLength, group})
 })
 
 app.get("/rooms/:id", isLoggedIn, async (req, res) => {
-
     const group = await Group.findById(req.params.id);
-    //console.log('group in rounds is ', group);
-
     res.render("rounds.ejs", { group });
 })
 
@@ -402,8 +367,7 @@ app.get("/rooms/:id/start", isLoggedIn, async (req, res) => {
     console.log('id is ', req.params.id);
     const group = await Group.findById(req.params.id);
     console.log('group: ', group);
-
-        res.render("start.ejs", {group});
+    res.render("start.ejs", {group});
 
 })
 
@@ -411,9 +375,6 @@ app.get("/rooms/:id/startQuiz", isLoggedIn, async (req, res) => {
     const {id} = req.params;
     console.log('id is this ', id);
     const group = await Group.findById(id);
-    //console.log('group passed to group1.ejs ', group)
-
-
    res.render("group1.ejs", { group });
 })
 
@@ -490,6 +451,13 @@ app.get("/urls", async (req, res) => {
     res.render("/urls", {group});
 })
 
+app.get("/board",isLoggedIn, (req, res) => {
+    let data = req.user.username;
+    console.log(data)
+    res.render('board', {username:data});
+}
+);
+
 
 
 const questions = [
@@ -512,7 +480,6 @@ let musers = [];
 
 
 io.on('connection', (socket) => {
-    //console.log('a client connected');
     connections.push(socket);
     const user = {
         id: socket.id,
@@ -524,19 +491,7 @@ io.on('connection', (socket) => {
 
     socket.on('join', (data) => {
 
-
-
-
-
-            socket.join(data.room);
-
-           // socket.to(data.room).broadcast.emit('userJoined', req.user)
-            //console.log('a person joined room')
-
-
-
-
-
+        socket.join(data.room);           
         io.to(data.room).emit('firstLoadQuestions', questions);
     })
 
@@ -571,27 +526,6 @@ io.on('connection', (socket) => {
         socket.broadcast.to(data.room).emit('savedImages', data)
     })
 
-    /*
-    socket.on('roundTwo', (data) => {
-        console.log('roundtwo event')
-        const myRoom = io.sockets.adapter.rooms.get(data.room);
-        const numUsers = myRoom ? myRoom.size : 0;
-        console.log('users ', numUsers)
-
-        if (numUsers >= 2){
-            console.log('real event ')
-            io.to(data.room).emit('roundTwo', data)
-        } else{
-            let data = {
-                numUsers
-            }
-            console.log('not enough people joined to room ');
-            socket.emit('notEnough', data);
-        }
-        
-    })
-    */
-
 
     socket.on('click', (data) => {
         socket.broadcast.to(data.room).emit('updateTimer', data);
@@ -600,14 +534,6 @@ io.on('connection', (socket) => {
     socket.on('time', data => {
         socket.broadcast.emit('displayTime', data);
     })
-
-    /*
-
-      socket.on('new-user', ({name, room}) => {
-          users[socket.id] = name;
-          socket.broadcast.to(room).emit('user-connected', name);
-      })
-  */
 
 
 
@@ -662,11 +588,7 @@ socket.on('handling-next-button', (data) => {
 
            io.to(data.room).emit('score', {score, questions});
            console.log('after emitting score from index');
-
-
         }
-
-
     })
 
     socket.on('nextRound', (data) => {
@@ -680,7 +602,6 @@ socket.on('handling-next-button', (data) => {
         console.log(data.pValue);
         console.log(data.sValue);
         socket.broadcast.emit('fillDetails', data);
-
     })
 
     socket.on('generateImage', (sendData) => {
@@ -774,17 +695,7 @@ socket.on('handling-next-button', (data) => {
         io.emit("userList", musers.map((user) => ({ id: user.id, username: user.username, remainingTime: user.remainingTime })));
     });
 
-
-
 })
-
-
-app.get("/board",isLoggedIn, (req, res) => {
-        let data = req.user.username;
-        console.log(data)
-        res.render('board', {username:data});
-    }
-);
 
 const port = process.env.PORT || 3000;
 

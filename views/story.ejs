@@ -29,11 +29,6 @@
     
 </section>
 
-
-
-
-
- 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
@@ -47,32 +42,9 @@
     let imageUrl = "";
 
     document.querySelector("#myForm").addEventListener("submit", onSubmit);
-document.querySelector("#save").style.display = "none";
+    document.querySelector("#save").style.display = "none";
+    document.getElementById("done").style.display = "none";
 
-//document.getElementById("done").addEventListener("click", reviewUrls);
-document.getElementById("done").style.display = "none";
-
-
-
-/*let story = document.getElementById("story");
-let submitStory = document.getElementById("submitStory");
-
-submitStory.addEventListener("click", submitStory)
-
-
-story.addEventListener("change", () => {
-    let myStory = story.value;
-    let data = {
-        myStory,
-        id: "story"
-    }
-    socket.emit('startStory', (data));
-})
-
-socket.on('copyStory', (data) => {
-    let storyElement = document.getElementById(data.id);
-    storyElement.value = data.myStory;
-})*/
 
 function onSubmit(e){
    
@@ -122,11 +94,9 @@ async function generateImageRequest(prompt, size){
         }
 
         const data = await response.json();
-       // console.log(data);
 
        imageUrl = data.data;
 
-       
 
        document.querySelector('#image').src = imageUrl;
        document.querySelector("#save").style.display = "block";
@@ -147,22 +117,15 @@ async function generateImageRequest(prompt, size){
        return imageUrl;
 
 
-
     } catch (error) {
         document.querySelector('.msg').textContent = error;
     }
 }
 
 document.querySelector("#save").addEventListener("click", async () => {
-   
-  //  const prompt = document.getElementById("prompt").value;
-    //const size = document.getElementById("size").value;
-    //const imageLink = await generateImageRequest(prompt, size);
     console.log('image url is ', imageUrl)
-    //console.log('console.logging it directly ', await generateImageRequest(prompt, size))
-   // console.log('in function to save image url. url is ', imageLink);
    
-   const saveResponse = await fetch('/rooms/<%= group._id%>/urls', {
+    const saveResponse = await fetch('/rooms/<%= group._id%>/urls', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -173,21 +136,18 @@ document.querySelector("#save").addEventListener("click", async () => {
         })
        })
 
-       let data = {
+    let data = {
         saveId: "save",
         room: '<%= group.group%>'
        }
 
-       socket.emit('savedImages', data);
+    socket.emit('savedImages', data);
 
-       if(!saveResponse.ok){
+    if(!saveResponse.ok){
             throw new Error('image could not be saved');
        }
 
-       document.querySelector("#save").style.display = "none";
-
-
-    
+    document.querySelector("#save").style.display = "none";    
     document.getElementById("prompt").value = "";
     document.getElementById("image").src = "";
        
@@ -196,7 +156,6 @@ document.querySelector("#save").addEventListener("click", async () => {
 document.getElementById("done").addEventListener("click", showUrl)
 
 function showUrl(){
-    //console.log(group.group)
     let link = "/rooms/<%= group._id%>/urls";
     let data = {
         link,
@@ -209,45 +168,12 @@ function showUrl(){
    
 }
 
-
-
-/*
-async function review2(){
-    console.log('in function to save image url. url is ', imageUrl);
-    const saveResponse = await fetch('/rooms/<%= group._id%>/urls', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Headers': '*'
-        },
-        body: JSON.stringify({
-            imageUrl
-        })
-       })
-
-       let data = {
-        saveId: "save",
-        room: '<%= group.group%>'
-       }
-
-       socket.emit('savedImages', (data));
-
-       if(!saveResponse.ok){
-            throw new Error('image could not be saved');
-       }
-}
-*/
-
 socket.on('savedImages', (data) => {
     console.log('saved Images on event')
     let saveButton = document.getElementById(data.saveId);
-    //location.href = "/rooms/<%= group._id%>/story"
     document.querySelector("#save").style.display = "none";
-
-
-
-document.getElementById("prompt").value = "";
-document.getElementById("image").src = "";
+    document.getElementById("prompt").value = "";
+    document.getElementById("image").src = "";
 })
 
 
@@ -270,9 +196,8 @@ if(!response.ok){
     }
 }
 
-
+/*
 function review(){
-    //location.href = "/urls";
     urls.push(imageUrl);
     console.log('urls saved are: ', urls);
     let url1 = urls[0];
@@ -304,11 +229,12 @@ function review(){
         });
     }
     }
+    */
 
     socket.emit('join', {room}); 
 
 socket.on('showingUrl', data => {
-    console.log('show urls');
+    //console.log('show urls');
     window.location = data.link;
 })
     
@@ -325,9 +251,10 @@ socket.on('fillDetails', (data) => {
 })
 
 socket.on('transferImage', (sendData) => {
-    console.log('transfer image');
+   /* console.log('transfer image');
     console.log('The url', sendData.imageUrl);
     console.log('The id ', sendData.id);
+    */
     document.getElementById(sendData.id).src = sendData.imageUrl;
     document.getElementById(sendData.saveId).style.display = "block";
     document.getElementById(sendData.doneId).style.display = "block";

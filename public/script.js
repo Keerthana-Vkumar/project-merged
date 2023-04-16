@@ -44,24 +44,9 @@ function generateUniqueId(){
     const timestamp = Date.now();
     const randomNumber = Math.random();
     const hexadecimalString = randomNumber.toString(16);
-
     return `id-${timestamp}-${hexadecimalString}`;
 }
-/*
 
-function chatStripe (isAi, value, uniqueId){
-    const chatContent = isAi ? `>${value}` : `>${value}`;
-    return (
-        `
-        <div class="wrapper ${isAi && 'ai'}"><br>
-        <div class="chat">
-        <div class="message" id=${uniqueId}>${chatContent}></div>
-        </div>
-        </div>
-        `
-    )
-}
-*/
 
 function chatStripe(isAi, value, uniqueId){
     return (
@@ -79,6 +64,7 @@ function chatStripe(isAi, value, uniqueId){
         `
     )
 }
+
 
 const handleSubmit = async (e) => {
     console.log('handle submit');
@@ -137,14 +123,11 @@ const handleSubmit = async (e) => {
         const err = await response.text();
         messageDiv.innerHTML = "Somethign went wrong;"
         alert(err);
-    }
-    
-
+    }    
 }
 
 
-socket.on('broadcastAnswer', (sendData) => {
-    
+socket.on('broadcastAnswer', (sendData) => {    
 
    const data = new FormData(chatgpt);
 
@@ -153,13 +136,11 @@ socket.on('broadcastAnswer', (sendData) => {
     chatgpt.reset();
 
     chatContainer.innerHTML += chatStripe(true, "", sendData.elementId)
-
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
 
     let messageDiv = document.getElementById(sendData.elementId);
     loader(messageDiv);
-    console.log('message div ', messageDiv);
     clearInterval(loadInterval);
     messageDiv.innerHTML = "";
     typeText(messageDiv, sendData.data);
@@ -173,13 +154,9 @@ chatgpt.addEventListener("keyup", (e) => {
 })
 
 
-
-
-
 let startTime = new Date().getTime();
 
 function buttonClick(){
-
     socket.emit('click', {timer: "timer", startTime: startTime, room});
     stopWatch = setInterval(countdown, 1000);
 }
@@ -195,11 +172,9 @@ let distance;
 
 function countdown(){
     let countDownDate = new Date(startTime + 2 * 60 * 1000);
-    //console.log('stop time ', countDownDate);
     let now = new Date().getTime();
     
     distance = countDownDate - now;
-
     
     let minutes = Math.floor((distance % (1000 * 60 * 60 )) / (1000 * 60));
     let seconds = Math.floor((distance % (1000 * 60 )) / 1000);
@@ -208,15 +183,12 @@ function countdown(){
     document.getElementById("seconds").innerHTML = seconds;
 
     if(distance < 0){
-        window.location.href = `/rooms/${groupId}/timer`;
-        //clearInterval(x);
-
-       
+        window.location.href = `/rooms/${groupId}/timer`;     
         document.getElementById("minutes").innerHTML = "00";
-        document.getElementById("seconds").innerHTML = "00";        
-
+        document.getElementById("seconds").innerHTML = "00";     
     }
 }
+
 
 function pauseCountdown(){
     clearInterval(stopWatch);
@@ -236,28 +208,20 @@ const answerButtons = document.getElementById("answer-buttons");
 const nextButton = document.getElementById("next-btn");
 let submitQuiz = document.getElementById("submit-quiz");
 
-console.log('question element+', questionElement);
+/*console.log('question element+', questionElement);
 console.log('answer element+', answerButtons);
 console.log('next button +', nextButton);
+*/
 
 let currentQuestionIndex = 0;
 let score = myScore;
 
 
-//const room = 'group1';
-
-    socket.emit('join', {room});    
-    //console.log('client tries to join group 1');
-
-  /*  socket.on('userJoined', (data) => {
-        console.log('this person joined ', data.username)
-    })
-    */
+socket.emit('join', {room});    
 
 
 socket.on('firstLoadQuestions', (questions) => {
     stopWatch = setInterval(countdown, 1000);
-
     console.log('timer started in first load questions');
     startQuiz(questions);
     socket.emit('resetScore', score);
@@ -272,16 +236,15 @@ function resetState(){
 
 function startQuiz(questions){    
     console.log('starting quiz');
-   // score = 0;
     nextButton.innerHTML = "Next";
     showQuestion(questions);      
 }
 
 function showQuestion(questions){
     resetState();
-    console.log('In show question: current index ', currentQuestionIndex);
+   // console.log('In show question: current index ', currentQuestionIndex);
 
-    console.log('Question: ',questions[currentQuestionIndex]);
+    //console.log('Question: ',questions[currentQuestionIndex]);
 
     let currentQuestion = questions[currentQuestionIndex];
     let questionNo = currentQuestionIndex + 1;
@@ -318,7 +281,6 @@ function selectAnswer(e){
 
     if (isCorrect){
         selectedBtn.classList.add("correct");
-        //score++;
     } else {
         selectedBtn.classList.add("incorrect");
     }    
@@ -337,7 +299,7 @@ function selectAnswer(e){
         isCorrect: isCorrect
     }
 
-    console.log('Before emitting score for 1');
+    //console.log('Before emitting score for 1');
     socket.emit('updateScore', (isCorrect));
 
     socket.emit('answer', {selectedAnswer: selectedBtn.innerHTML,
@@ -353,7 +315,6 @@ socket.on('updateAnswer', ({selectedAnswer, buttonId, isCorrect, myClass}) => {
    
     if (isCorrect){
         chosenButton.classList.add("correct");
-        //score++;
     } else {
         chosenButton.classList.add("incorrect");
     }
@@ -371,9 +332,9 @@ socket.on('updateAnswer', ({selectedAnswer, buttonId, isCorrect, myClass}) => {
 
 function handleNextButton(){
     
-    console.log('handle next button function');
+    //console.log('handle next button function');
     currentQuestionIndex++;            
-    console.log('current Question index ', currentQuestionIndex);
+    //console.log('current Question index ', currentQuestionIndex);
 
     theNextButtonId = "next-btn";
     socket.emit('buttonClicked', {theNextButtonId, room})
@@ -382,32 +343,26 @@ function handleNextButton(){
     nextButtonId = document.getElementById("next-btn");
 
     socket.emit('handling-next-button', {currentQuestionIndex, room, theNextButtonId});
-    console.log('tracking');
+    //console.log('tracking');
 
-    socket.on('loadQuestions', (questions) => {
-        
-        console.log('In netxbutton load questions option');
-        showQuestion(questions);       
-        
-           }       );
+    socket.on('loadQuestions', (questions) => {        
+        //console.log('In netxbutton load questions option');
+        showQuestion(questions);           
+    });
 
             
-           socket.on('score', (data) => {
-            console.log('in score option');
-            console.log('the score is ', data.score);
-            showScore(data.score, data.questions);                 
-
-           })
+    socket.on('score', (data) => {
+        console.log('in score option');
+        console.log('the score is ', data.score);
+        showScore(data.score, data.questions);                 
+    })
           
-            }
+    }
         
             
 function showScore(score, questions){
     resetState();
-    //score = 0;
     questionElement.innerHTML = `You socred ${score} out of ${questions.length}`;
-    //nextButton.innerHTML = "Submit";
-    //nextButton.style.display = "block";  
     
     submitQuiz.style.display = "block";
     submitQuiz.addEventListener('click', function(){
@@ -419,14 +374,13 @@ function showScore(score, questions){
 
 
 function redirectPage(score){
-    console.log('The score is from redirect page ', score);
+    //console.log('The score is from redirect page ', score);
     let submitQuizId = "submit-quiz";
     let endTime = pauseCountdown();
     let myMinutes = endTime.realMinutes;
     let mySeconds = endTime.realSeconds;
-    console.log('end time is ...', endTime);
-   link = "/rooms/"+groupId+"/finishedQuiz?myMinutes="+myMinutes+"&mySeconds="+mySeconds+"&score="+score;
-   //link = `/rooms/${groupId}/finishedQuiz?myMinutes=myMinutes&mySeconds=mySeconds&score=score`;
+   // console.log('end time is ...', endTime);
+    link = "/rooms/"+groupId+"/finishedQuiz?myMinutes="+myMinutes+"&mySeconds="+mySeconds+"&score="+score;
     socket.emit('redirectOthers', ({link, submitQuizId, room}));
     
    location.href = link;
@@ -441,21 +395,18 @@ socket.on('redirectedOthers', ({link, submitQuizId}) => {
 })
 
 socket.on('updateUi', (data) => {
-    console.log('in update Ui method');
-    
-    //document.getElementById(data.theNextButtonId).click();
+    //console.log('in update Ui method');
     document.getElementById(data.theNextButtonId).style = "none";
     
     currentQuestionIndex++; 
-    console.log('in update ui , index is ', currentQuestionIndex);
+    //console.log('in update ui , index is ', currentQuestionIndex);
     socket.emit('handling-next-button', {currentQuestionIndex, room});
     
 
     socket.on('loadQuestions', (questions) => {
-        console.log('In netxbutton load questions option');
+       // console.log('In netxbutton load questions option');
         showQuestion(questions);       
-        
-           }       );
+        });
 
             
            socket.on('score', (data) => {
@@ -491,8 +442,9 @@ socket.on('copyStory', (data) => {
     storyElement.value = data.myStory;
 })
 
-function onSubmit(e){
-   
+/*
+
+function onSubmit(e){   
     e.preventDefault();
 
     document.querySelector('.msg').textContent = "";
@@ -518,6 +470,7 @@ function onSubmit(e){
 
     generateImageRequest(prompt, size)
 }
+
 
 let urls = [];
 let imageUrl = "";
@@ -595,7 +548,7 @@ function review(){
         });
     }
     }
-
+*/
     
 
 socket.on('fillDetails', (data) => {

@@ -27,7 +27,6 @@ round1.addEventListener("click", () => {
     console.log('round1 chosen')
     let data = {id: "round1", room: '<%= group.group%>'}
     socket.emit('roundOne', data);
-    //location.href = "/rooms/<%= group._id %>/startQuiz";
 })
 
 socket.on('notEnough', (data) => {
@@ -37,29 +36,20 @@ socket.on('notEnough', (data) => {
     mainDiv.setAttribute("class", "alert alert-danger");
     mainDiv.setAttribute("role", "alert");
     mainDiv.innerHTML = "Not enough people have joined"
-    console.log(mainDiv);
+
 
    
     let message = document.createElement("span");
-
-   // mainDiv.appendChild(message);
     let close = document.createElement("span");
     close.setAttribute("id", "closeMessage");
     close.innerText = "X";
-    console.log('close ', close);
+  
     mainDiv.appendChild(close);
-   // let messageContent = document.createTextNode("Not enough people have joined the room");
- //  message.innerText = "Not enough people have joined";
-   //message.setAttribute("id", "notEnough");
-    //console.log('Message element ', message);
     let theBody = document.getElementsByTagName("body");
-    console.log('th ebody ', theBody[0]);
-    //theBody[0].prepend(close);
-    theBody[0].prepend(mainDiv);
 
+    theBody[0].prepend(mainDiv);
     close.addEventListener("click", closeMessage);
 
-    //theBody.insertBefore(message, theBody[0].firstChild);
 })
 
 function closeMessage(){
@@ -78,21 +68,6 @@ socket.on('roundOne', (data) => {
     location.href = "/rooms/<%= group._id%>/startQuiz"
 })
 
-/*let round2 = document.getElementById("round2");
-//console.log("round 2", round2)
-
-round2.addEventListener("click", () => {
-   
-    console.log('round2 chosen')
-    let data = {id: "round2", room: '<%= group.group%>'}
-    socket.emit('roundTwo', data);
-    //location.href = "/rooms/<%= group._id%>/story";
-})
-
-socket.on('roundTwo', (data) => {
-    console.log('round two chosen');
-    location.href = "/rooms/<%= group._id%>/story"
-})*/
    </script>
 
    
