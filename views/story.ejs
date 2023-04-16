@@ -95,19 +95,19 @@ async function generateImageRequest(prompt, size){
 
         const data = await response.json();
 
-       imageUrl = data.data;
+        imageUrl = data.data;
 
 
-       document.querySelector('#image').src = imageUrl;
-       document.querySelector("#save").style.display = "block";
-       document.getElementById("done").style.display = "block";
+        document.querySelector('#image').src = imageUrl;
+        document.querySelector("#save").style.display = "block";
+        document.getElementById("done").style.display = "block";
 
-       let sendData = {
-        imageUrl,
-        id: "image",
-        saveId: "save",
-        doneId: "done",
-        room: '<%= group.group%>'
+        let sendData = {
+            imageUrl,
+            id: "image",
+            saveId: "save",
+            doneId: "done",
+            room: '<%= group.group%>'
        }
 
        socket.emit('generateImage', sendData);
@@ -169,14 +169,13 @@ function showUrl(){
 }
 
 socket.on('savedImages', (data) => {
-    console.log('saved Images on event')
     let saveButton = document.getElementById(data.saveId);
     document.querySelector("#save").style.display = "none";
     document.getElementById("prompt").value = "";
     document.getElementById("image").src = "";
 })
 
-
+/*
 async function reviewUrls(){
     try{
 
@@ -195,46 +194,12 @@ if(!response.ok){
         document.querySelector('.msg').textContent = error;
     }
 }
+*/
 
-/*
-function review(){
-    urls.push(imageUrl);
-    console.log('urls saved are: ', urls);
-    let url1 = urls[0];
-    let url2 = urls[1];
-    let url3 = urls[2];
-    console.log(url1)
-    console.log(url2)
-    console.log(url3)
-    if (urls.length >= 3) {
-        fetch('/urls', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url1: url1,
-                url2: url2,
-                url3: url3
-            })
-        }).then(response => {
-            if (response.ok) {
-                console.log('URLs saved successfully');
-                location.href = "/urls";
-            } else {
-                console.log('Failed to save URLs');
-            }
-        }).catch(error => {
-            console.log('Error:', error);
-        });
-    }
-    }
-    */
 
-    socket.emit('join', {room}); 
+socket.emit('join', {room}); 
 
 socket.on('showingUrl', data => {
-    //console.log('show urls');
     window.location = data.link;
 })
     
@@ -251,14 +216,9 @@ socket.on('fillDetails', (data) => {
 })
 
 socket.on('transferImage', (sendData) => {
-   /* console.log('transfer image');
-    console.log('The url', sendData.imageUrl);
-    console.log('The id ', sendData.id);
-    */
     document.getElementById(sendData.id).src = sendData.imageUrl;
     document.getElementById(sendData.saveId).style.display = "block";
-    document.getElementById(sendData.doneId).style.display = "block";
-     
+    document.getElementById(sendData.doneId).style.display = "block";     
 })
 </script>
 

@@ -67,7 +67,6 @@ function chatStripe(isAi, value, uniqueId){
 
 
 const handleSubmit = async (e) => {
-    console.log('handle submit');
     let parsedData = "";
     
     e.preventDefault();
@@ -129,7 +128,7 @@ const handleSubmit = async (e) => {
 
 socket.on('broadcastAnswer', (sendData) => {    
 
-   const data = new FormData(chatgpt);
+    const data = new FormData(chatgpt);
 
     chatContainer.innerHTML += chatStripe(false, sendData.myPrompt);
 
@@ -208,11 +207,6 @@ const answerButtons = document.getElementById("answer-buttons");
 const nextButton = document.getElementById("next-btn");
 let submitQuiz = document.getElementById("submit-quiz");
 
-/*console.log('question element+', questionElement);
-console.log('answer element+', answerButtons);
-console.log('next button +', nextButton);
-*/
-
 let currentQuestionIndex = 0;
 let score = myScore;
 
@@ -222,7 +216,6 @@ socket.emit('join', {room});
 
 socket.on('firstLoadQuestions', (questions) => {
     stopWatch = setInterval(countdown, 1000);
-    console.log('timer started in first load questions');
     startQuiz(questions);
     socket.emit('resetScore', score);
 })
@@ -235,16 +228,12 @@ function resetState(){
 }
 
 function startQuiz(questions){    
-    console.log('starting quiz');
     nextButton.innerHTML = "Next";
     showQuestion(questions);      
 }
 
 function showQuestion(questions){
     resetState();
-   // console.log('In show question: current index ', currentQuestionIndex);
-
-    //console.log('Question: ',questions[currentQuestionIndex]);
 
     let currentQuestion = questions[currentQuestionIndex];
     let questionNo = currentQuestionIndex + 1;
@@ -299,7 +288,6 @@ function selectAnswer(e){
         isCorrect: isCorrect
     }
 
-    //console.log('Before emitting score for 1');
     socket.emit('updateScore', (isCorrect));
 
     socket.emit('answer', {selectedAnswer: selectedBtn.innerHTML,
@@ -307,11 +295,9 @@ function selectAnswer(e){
 }
 
 socket.on('updateAnswer', ({selectedAnswer, buttonId, isCorrect, myClass}) => {
-    console.log('inside update Answer');
     
     let chosenButton = document.getElementById(buttonId);
-    let allButtons = document.getElementsByClassName(myClass);
-    
+    let allButtons = document.getElementsByClassName(myClass);    
    
     if (isCorrect){
         chosenButton.classList.add("correct");
@@ -331,22 +317,14 @@ socket.on('updateAnswer', ({selectedAnswer, buttonId, isCorrect, myClass}) => {
 
 
 function handleNextButton(){
-    
-    //console.log('handle next button function');
     currentQuestionIndex++;            
-    //console.log('current Question index ', currentQuestionIndex);
-
     theNextButtonId = "next-btn";
     socket.emit('buttonClicked', {theNextButtonId, room})
-    
-
     nextButtonId = document.getElementById("next-btn");
 
     socket.emit('handling-next-button', {currentQuestionIndex, room, theNextButtonId});
-    //console.log('tracking');
 
     socket.on('loadQuestions', (questions) => {        
-        //console.log('In netxbutton load questions option');
         showQuestion(questions);           
     });
 
@@ -373,19 +351,17 @@ function showScore(score, questions){
 }
 
 
-function redirectPage(score){
-    //console.log('The score is from redirect page ', score);
+function redirectPage(score){    
     let submitQuizId = "submit-quiz";
     let endTime = pauseCountdown();
     let myMinutes = endTime.realMinutes;
     let mySeconds = endTime.realSeconds;
-   // console.log('end time is ...', endTime);
+   
     link = "/rooms/"+groupId+"/finishedQuiz?myMinutes="+myMinutes+"&mySeconds="+mySeconds+"&score="+score;
     socket.emit('redirectOthers', ({link, submitQuizId, room}));
     
-   location.href = link;
-    score = 0;
-    
+    location.href = link;
+    score = 0;    
 }
 
 socket.on('redirectedOthers', ({link, submitQuizId}) => {
@@ -395,25 +371,21 @@ socket.on('redirectedOthers', ({link, submitQuizId}) => {
 })
 
 socket.on('updateUi', (data) => {
-    //console.log('in update Ui method');
-    document.getElementById(data.theNextButtonId).style = "none";
     
+    document.getElementById(data.theNextButtonId).style = "none";    
     currentQuestionIndex++; 
-    //console.log('in update ui , index is ', currentQuestionIndex);
+    
     socket.emit('handling-next-button', {currentQuestionIndex, room});
     
-
-    socket.on('loadQuestions', (questions) => {
-       // console.log('In netxbutton load questions option');
+    socket.on('loadQuestions', (questions) => {       
         showQuestion(questions);       
         });
 
             
-           socket.on('score', (data) => {
-            console.log('in socre option');
-            showScore(data.score, data.questions);
-
-           })
+    socket.on('score', (data) => {
+        console.log('in socre option');
+        showScore(data.score, data.questions);
+    })
 })
 
 socket.on('user-disconnected', name => {
@@ -441,118 +413,9 @@ socket.on('copyStory', (data) => {
     let storyElement = document.getElementById(data.id);
     storyElement.value = data.myStory;
 })
-
-/*
-
-function onSubmit(e){   
-    e.preventDefault();
-
-    document.querySelector('.msg').textContent = "";
-    document.querySelector('#image').src = "";
-
-    let pValue = document.getElementById("prompt").value;
-    let sValue = document.getElementById("size").value;
-
-    const prompt = document.getElementById("prompt").value;
-    const size = document.getElementById("size").value;
-
-    if(prompt === ""){
-        alert("please add some text");
-        return;
-    }
-    myData = {
-        pId: "prompt",
-        sId: "size",
-        pValue,
-        sValue
-    }
-    socket.emit('formSubmit', (myData));
-
-    generateImageRequest(prompt, size)
-}
-
-
-let urls = [];
-let imageUrl = "";
-
-async function generateImageRequest(prompt, size){
-    try{
-
-        const response = await fetch('http://localhost:3000', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                prompt, size
-            })
-        });
-
-        if(!response.ok){
-            throw new Error('that image could not be generated');
-        }
-
-        const data = await response.json();
-       // console.log(data);
-
-       imageUrl = data.data;
-
-
-       document.querySelector('#image').src = imageUrl;
-       document.querySelector("#save").style.display = "";
-
-       let sendData = {
-        imageUrl,
-        id: "image"
-       }
-
-       socket.emit('generateImage', sendData);
-
-    } catch (error) {
-        document.querySelector('.msg').textContent = error;
-    }
-}
-
-document.querySelector("#save").addEventListener("click", review);
-
-function review(){
-    //location.href = "/urls";
-    urls.push(imageUrl);
-    console.log('urls saved are: ', urls);
-    let url1 = urls[0];
-    let url2 = urls[1];
-    let url3 = urls[2];
-    console.log(url1)
-    console.log(url2)
-    console.log(url3)
-    if (urls.length >= 3) {
-        fetch('/urls', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                url1: url1,
-                url2: url2,
-                url3: url3
-            })
-        }).then(response => {
-            if (response.ok) {
-                console.log('URLs saved successfully');
-                location.href = "/urls";
-            } else {
-                console.log('Failed to save URLs');
-            }
-        }).catch(error => {
-            console.log('Error:', error);
-        });
-    }
-    }
-*/
     
 
 socket.on('fillDetails', (data) => {
-    console.log('broadcasted');
 
     let myPrompt = document.getElementById(data.pId);
     let mySize = document.getElementById(data.sId);
@@ -563,9 +426,5 @@ socket.on('fillDetails', (data) => {
 })
 
 socket.on('transferImage', (sendData) => {
-    console.log('transfer image');
-    console.log('The url', sendData.imageUrl);
-    console.log('The id ', sendData.id);
-    document.getElementById(sendData.id).src = sendData.imageUrl;
-     
+    document.getElementById(sendData.id).src = sendData.imageUrl;     
 })
