@@ -380,7 +380,7 @@ app.post("/chat", async (req, res) => {
         console.log('in post request');
         const prompt = req.body.prompt;
         const response = await openai.ChatCompletion.create({
-            model: "text-davinci-003",
+            model: "gpt-4",
   prompt: `${prompt}`,
   temperature: 0,
   max_tokens: 100,
